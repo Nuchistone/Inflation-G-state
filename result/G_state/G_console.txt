@@ -1,0 +1,146 @@
+============================================================
+G Vacuum - Complete Solution with Parameter Scan
+============================================================
+m_phi = 5.8774e-06 M_pl (from A_s = m^2 N_*^2/(6 pi^2))
+H_*   = 3.7172e-05 M_pl
+Tolerances: rtol = 1e-13, atol = 1e-22
+
+>> Running verification tests ...
+>> Computing P_zeta(k) spectra (needed by Test 4 and Fig. 1) ...
+
+--- VERIFICATION TESTS ---
+  naming: 'error' = numerical inaccuracy of the integrator itself;
+          'dev'   = (numerical - analytical)/analytical, a physical
+          difference between approximation schemes, not a mistake
+
+[Test 1] Tolerance convergence (pivot, beta_0 = 0)
+benchmark: atol = 1e-22, R = P_G/P_BD = 1.0012442
+error = R(atol)/R(1e-22) - 1   [numerical error, percent]
+  atol =    1e-15: R = 1.0002530, error = -0.0990047%
+  atol =    1e-16: R = 1.0011680, error = -0.0076112%
+  atol =    1e-17: R = 1.0012384, error = -0.0005814%
+  atol =    1e-18: R = 1.0012438, error = -0.0000434%
+  atol =    1e-19: R = 1.0012442, error = -0.0000032%
+  atol =    1e-20: R = 1.0012442, error = -0.0000002%
+  atol =    1e-21: R = 1.0012442, error = -0.0000000%
+
+[Test 2] Wronskian conservation and normalisation
+  Wronskian Im(v*, v_x): mean = 1.177842e-22, theory = 1.177842e-22
+  normalisation error = |mean/theory - 1| = 4.01e-12
+  conservation error  = std/mean (CV along trajectory) = 6.75e-12
+  Conservation: PASS
+
+[Test 3] Single mode at the pivot vs (alpha+|beta|)^2
+dev = (P_G/P_BD)_ODE / (alpha_k+|beta_k|)^2 - 1   [enhancement factor at the pivot, percent]
+  beta_0 = 0.03: P_G/P_BD = 1.062752, (a+|b|)^2 = 1.061509, |dev| = 0.117%
+  beta_0 = 0.10: P_G/P_BD = 1.221041, (a+|b|)^2 = 1.219786, |dev| = 0.103%
+  beta_0 = 0.30: P_G/P_BD = 1.802668, (a+|b|)^2 = 1.801247, |dev| = 0.079%
+
+[Test 4] ODE vs analytical over k in [1e-4, 10] Mpc^-1
+dev = (P_G/P_BD)_ODE / (alpha_k+|beta_k|)^2 - 1,   [enhancement factor, percent]
+  beta_0 = 0.03: max dev = 1.368% (at k = 1.00e+01), max dev in fit window [0.010, 0.25] = 0.447%
+  beta_0 = 0.10: max dev = 1.368% (at k = 1.00e+01), max dev in fit window [0.010, 0.25] = 0.433%
+  beta_0 = 0.30: max dev = 1.368% (at k = 1.00e+01), max dev in fit window [0.010, 0.25] = 0.408%
+
+[Test 5] beta_0 -> 0 limit (G -> BD)
+dev = P_G/P_BD - 1   [spectrum ratio at the pivot; expect 0]
+  (at beta_0 = 0 the dev is the pure nu-drift effect, see Tests 6-8)
+  beta_0 =  1.0e-02: P_G/P_BD = 1.021342, dev = +2.1342%
+  beta_0 =  1.0e-04: P_G/P_BD = 1.001443, dev = +0.1443%
+  beta_0 =  1.0e-06: P_G/P_BD = 1.001246, dev = +0.1246%
+  beta_0 =  0.0e+00: P_G/P_BD = 1.001244, dev = +0.1244%
+
+[Test 6] Constant-nu experiment (origin of the deviation)
+dev_|v|^2 = |v_ODE(x_fz)|^2 / |v_Hankel(x_fz)|^2 - 1   [mode amplitude, BD initial data]
+  k [Mpc^-1] |  drifting nu |   const nu
+      0.0001 |     -1.0633% | -2.6978e-13
+        0.01 |     -0.2079% | -3.7335e-12
+        0.05 |     +0.1244% | -8.2705e-12
+        0.25 |     +0.4765% | -2.4516e-11
+           1 |     +0.7969% | -5.9158e-11
+          10 |     +1.3681% | -2.2402e-10
+  Experiment: PASS (max |const-nu dev| 2.2e-10 = integrator round-off error bound)
+
+[Test 7] Freeze-out truncation exclusion
+  (a) dev_|v|^2 = |v(x_fz)|^2/|v_asym(x_fz)|^2 - 1 = +0.2402%
+      [asymptotic coefficient measured at x_ref = e^-30, scaled back with the exact x^(1/2-nu) asymptotics; series cross-check 2(x_fz/2)^2/(nu-1) = +0.2399%]
+      common to G and BD (same readout point) -> cancels in the ratio
+  (b1) dphi = arg v(x_fz) - arg v(x_ref) = 3.59e-05 rad
+      dev_enh = enh(phi_fz)/enh(phi_ref) - 1 = -6.16e-07,  enh(phi) = a^2+b^2+2ab cos(2phi)
+  (b2) dev_enh = enh(phi_ref)/(a+|b|)^2 - 1 = -2.25e-04
+      (O(eps*^2) property of the analytical formula: v*/v -> -exp(-2 i pi eps*),
+       independent of x_fz; NOT a truncation error)
+  (c) x_fz from mode_grid() for the Test-6 modes: ['0.0498', '0.0498', '0.0498', '0.0498', '0.0498', '0.0498'] -- all e^-3, hence k-independent
+
+[Test 8] Closed-form estimate vs measured deviation
+  S = d ln|v|^2/d nu = 7.49 (dominated by -2 ln x_fz = 6.0)
+  estimate = S [nu(N_hc) - nu*],  N_hc = N* + ln(k/k*)
+  k [Mpc^-1] |  estimate | measured (Test 6)
+      0.0001 |  -1.1717% |          -1.0633%
+        0.01 |  -0.3261% |          -0.2079%
+        0.05 |  +0.0000% |          +0.1244%
+        0.25 |  +0.3441% |          +0.4765%
+           1 |  +0.6561% |          +0.7969%
+          10 |  +1.2091% |          +1.3681%
+
+[Saved: G_tolerance.png]
+
+[Saved: Pzeta.png]
+
+============================================================
+FULL PARAMETER SCAN (5x5 grid)
+============================================================
+  b0= 0.01, kc= 0.05: ns_fit=0.9587 (BD=0.9667),   d_fit=-0.0080, d_naive=-0.0200,   d_fit/d_naive=+0.4007, as=-0.002028, chi2=2.21 ***
+  b0= 0.01, kc= 0.10: ns_fit=0.9607 (BD=0.9667),   d_fit=-0.0059, d_naive=-0.0050,   d_fit/d_naive=+1.1876, as=-0.006281, chi2=0.99 ***
+  b0= 0.01, kc= 0.30: ns_fit=0.9654 (BD=0.9667),   d_fit=-0.0012, d_naive=-0.0006,   d_fit/d_naive=+2.2384, as=-0.001853, chi2=0.02 ***
+  b0= 0.01, kc= 0.50: ns_fit=0.9662 (BD=0.9667),   d_fit=-0.0005, d_naive=-0.0002,   d_fit/d_naive=+2.3849, as=-0.000730, chi2=0.09 ***
+  b0= 0.01, kc= 1.00: ns_fit=0.9665 (BD=0.9667),   d_fit=-0.0001, d_naive=-0.0001,   d_fit/d_naive=+2.4513, as=-0.000190, chi2=0.15 ***
+  b0= 0.03, kc= 0.05: ns_fit=0.9426 (BD=0.9667),   d_fit=-0.0240, d_naive=-0.0600,   d_fit/d_naive=+0.4007, as=-0.006084, chi2=28.12
+  b0= 0.03, kc= 0.10: ns_fit=0.9489 (BD=0.9667),   d_fit=-0.0178, d_naive=-0.0150,   d_fit/d_naive=+1.1874, as=-0.018840, chi2=14.59
+  b0= 0.03, kc= 0.30: ns_fit=0.9629 (BD=0.9667),   d_fit=-0.0037, d_naive=-0.0017,   d_fit/d_naive=+2.2377, as=-0.005559, chi2=0.22 ***
+  b0= 0.03, kc= 0.50: ns_fit=0.9652 (BD=0.9667),   d_fit=-0.0014, d_naive=-0.0006,   d_fit/d_naive=+2.3841, as=-0.002188, chi2=0.01 ***
+  b0= 0.03, kc= 1.00: ns_fit=0.9663 (BD=0.9667),   d_fit=-0.0004, d_naive=-0.0002,   d_fit/d_naive=+2.4503, as=-0.000568, chi2=0.11 ***
+  b0= 0.05, kc= 0.05: ns_fit=0.9266 (BD=0.9667),   d_fit=-0.0401, d_naive=-0.1000,   d_fit/d_naive=+0.4006, as=-0.010146, chi2=83.12
+  b0= 0.05, kc= 0.10: ns_fit=0.9370 (BD=0.9667),   d_fit=-0.0297, d_naive=-0.0250,   d_fit/d_naive=+1.1870, as=-0.031396, chi2=44.16
+  b0= 0.05, kc= 0.30: ns_fit=0.9605 (BD=0.9667),   d_fit=-0.0062, d_naive=-0.0028,   d_fit/d_naive=+2.2362, as=-0.009259, chi2=1.12 ***
+  b0= 0.05, kc= 0.50: ns_fit=0.9643 (BD=0.9667),   d_fit=-0.0024, d_naive=-0.0010,   d_fit/d_naive=+2.3823, as=-0.003644, chi2=0.02 ***
+  b0= 0.05, kc= 1.00: ns_fit=0.9661 (BD=0.9667),   d_fit=-0.0006, d_naive=-0.0003,   d_fit/d_naive=+2.4484, as=-0.000946, chi2=0.08 ***
+  b0= 0.10, kc= 0.05: ns_fit=0.8866 (BD=0.9667),   d_fit=-0.0800, d_naive=-0.2000,   d_fit/d_naive=+0.4001, as=-0.020341, chi2=347.16
+  b0= 0.10, kc= 0.10: ns_fit=0.9074 (BD=0.9667),   d_fit=-0.0593, d_naive=-0.0500,   d_fit/d_naive=+1.1851, as=-0.062748, chi2=187.34
+  b0= 0.10, kc= 0.30: ns_fit=0.9543 (BD=0.9667),   d_fit=-0.0124, d_naive=-0.0056,   d_fit/d_naive=+2.2293, as=-0.018464, chi2=6.39
+  b0= 0.10, kc= 0.50: ns_fit=0.9619 (BD=0.9667),   d_fit=-0.0047, d_naive=-0.0020,   d_fit/d_naive=+2.3740, as=-0.007263, chi2=0.50 ***
+  b0= 0.10, kc= 1.00: ns_fit=0.9654 (BD=0.9667),   d_fit=-0.0012, d_naive=-0.0005,   d_fit/d_naive=+2.4394, as=-0.001886, chi2=0.02 ***
+  b0= 0.30, kc= 0.05: ns_fit=0.7295 (BD=0.9667),   d_fit=-0.2372, d_naive=-0.6000,   d_fit/d_naive=+0.3954, as=-0.062508, chi2=3142.59
+  b0= 0.30, kc= 0.10: ns_fit=0.7919 (BD=0.9667),   d_fit=-0.1748, d_naive=-0.1500,   d_fit/d_naive=+1.1651, as=-0.186852, chi2=1696.48
+  b0= 0.30, kc= 0.30: ns_fit=0.9307 (BD=0.9667),   d_fit=-0.0360, d_naive=-0.0167,   d_fit/d_naive=+2.1593, as=-0.053784, chi2=66.39
+  b0= 0.30, kc= 0.50: ns_fit=0.9529 (BD=0.9667),   d_fit=-0.0137, d_naive=-0.0060,   d_fit/d_naive=+2.2910, as=-0.021049, chi2=8.14
+  b0= 0.30, kc= 1.00: ns_fit=0.9631 (BD=0.9667),   d_fit=-0.0035, d_naive=-0.0015,   d_fit/d_naive=+2.3498, as=-0.005452, chi2=0.18 ***
+
+*** = within 2sigma of Planck (chi2 < 4)
+
+[Saved: G_parameter_scan.png]
+
+============================================================
+SUMMARY
+============================================================
+
+Planck-Compatible Parameters (chi2 < 4, 95% CL):
+  beta_0= 0.01, k_c= 0.05: n_s=0.9587, chi2=2.21
+  beta_0= 0.01, k_c= 0.10: n_s=0.9607, chi2=0.99
+  beta_0= 0.01, k_c= 0.30: n_s=0.9654, chi2=0.02
+  beta_0= 0.01, k_c= 0.50: n_s=0.9662, chi2=0.09
+  beta_0= 0.01, k_c= 1.00: n_s=0.9665, chi2=0.15
+  beta_0= 0.03, k_c= 0.30: n_s=0.9629, chi2=0.22
+  beta_0= 0.03, k_c= 0.50: n_s=0.9652, chi2=0.01
+  beta_0= 0.03, k_c= 1.00: n_s=0.9663, chi2=0.11
+  beta_0= 0.05, k_c= 0.30: n_s=0.9605, chi2=1.12
+  beta_0= 0.05, k_c= 0.50: n_s=0.9643, chi2=0.02
+  beta_0= 0.05, k_c= 1.00: n_s=0.9661, chi2=0.08
+  beta_0= 0.10, k_c= 0.50: n_s=0.9619, chi2=0.50
+  beta_0= 0.10, k_c= 1.00: n_s=0.9654, chi2=0.02
+  beta_0= 0.30, k_c= 1.00: n_s=0.9631, chi2=0.18
+
+All outputs:
+  G_Pzeta.png - P_zeta(k) for test parameters
+  G_parameter_scan.png - 5x5 parameter scan results
+============================================================
